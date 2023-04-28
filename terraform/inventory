@@ -1,1 +1,23 @@
+recource "virtualbox_vm" "pavlo-an-vm" {
+count = 2
 
+name         = "pavlo-vm-${count.index = 1}"
+image        = var.img
+memory       = var.ram
+cpus         = "1"
+boot_order   = ["disk"]
+
+network_adapter {
+     type = "bridged"
+     host_interface="Realtek PCIe GbE Family Comtroller"
+     }
+}
+
+
+
+
+resource "local_file" "tf_ip" {
+count = 2
+content = "[ALL]\n${ virtualbox_vm.pavlo-an-vm[0].network_adapter.0.ipv4_adderess} ansible_ssh_user=ubuntu" # В контенті ми описуємо що саме ми запишемо у файл. Якщо приглянутися, можна побачити, що структура тексту являється інвентаризацією для інструменту Ansible. Єдине чого не вистачає – це ІР адреси віртуальної машини яку ми знати не можемо, оскільки машини ще не існує. Саме тому дана конструкція ${aws_instance.my-vm[0].public_ip} звернеться до нульового створеного ресурсу aws_instance, вичитає його публічну ІР адресу та дасть змогу її записати.
+  	filename = ". /inventory" # Шлях до файлу який було створено в минулому кроці.
+}
